@@ -29,7 +29,13 @@ const Login = () => {
         await signInWithEmailAndPassword(auth, email, password);
         setEmail("");
         setPassword("");
-        navigation.navigate("Home");
+
+        // navigation.navigate("Home");
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Home" }],
+        });
       } else {
         setErrorMessage("Please fill in all the fields");
       }
