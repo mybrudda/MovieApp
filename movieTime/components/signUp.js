@@ -2,7 +2,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import React, { useState } from "react";
-import { Alert, Button, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Button, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { auth } from '../firebaseConfig';
 
 const SignUp = () => {
@@ -28,7 +28,7 @@ const SignUp = () => {
       setEmail("");
       setPassword("");
       setUsername("");
-      navigation.navigate('Login')
+      
     } catch (error) {
       setErrorMessage(error.message); 
      
@@ -38,7 +38,8 @@ const SignUp = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        <Text style={styles.title}>MovieTime</Text>
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+        <Text style={styles.title}>Sign Up</Text>
         <TextInput
           style={styles.input}
           placeholder="Username"
@@ -61,7 +62,10 @@ const SignUp = () => {
           onChangeText={setPassword}
         />
         <Button title="Sign Up" onPress={handleSignUp} />
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.linkText}>Move to Login</Text>
+        </TouchableOpacity>
+        
       </View>
     </TouchableWithoutFeedback>
   );
@@ -91,6 +95,13 @@ const styles = StyleSheet.create({
   error: {
     color: "red",
     marginTop: 10,
+  },
+  linkText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: 'purple', 
+    textDecorationLine: 'underline', 
+    marginVertical: 10,
   },
 });
 

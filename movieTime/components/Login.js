@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth } from '../firebaseConfig';
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,6 +30,8 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
+      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+
       <Text style={styles.title}>Login</Text>
 
       <TextInput
@@ -47,9 +49,13 @@ const Login = () => {
         secureTextEntry
       />
 
-      <Text>{errorMessage}</Text>
+      
 
       <Button title="Login" onPress={handleLogin} />
+
+      <TouchableOpacity onPress={() => navigation.navigate('signUp')}>
+        <Text style={styles.linkText}>Create new account</Text>
+      </TouchableOpacity>
 
 
     </View>
@@ -76,6 +82,17 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     marginBottom: 20,
+  },
+  error: {
+    color: "red",
+    marginTop: 10,
+  },
+  linkText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: 'purple', 
+    textDecorationLine: 'underline', 
+    marginVertical: 10,
   },
 });
 

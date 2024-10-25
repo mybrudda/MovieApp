@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    paddingTop: "15%",
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
