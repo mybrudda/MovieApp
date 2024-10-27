@@ -1,17 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from "react-native";
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { Button, Card, Input, Text } from "react-native-elements";
 import { auth } from "../firebaseConfig";
 
 const SignUp = () => {
@@ -31,11 +22,7 @@ const SignUp = () => {
 
     try {
       if (email.length > 0 && password.length > 0 && username.length > 0) {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         await updateProfile(user, {
@@ -56,7 +43,7 @@ const SignUp = () => {
       }
     } catch (error) {
       setErrorMessage(
-        "Please enter valid email address and password atleas 6 charecters long"
+        "Please enter a valid email and password (at least 6 characters long)"
       );
     }
   };
@@ -64,31 +51,57 @@ const SignUp = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
-        <Text style={styles.title}>Sign Up</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <Button title="Sign Up" onPress={handleSignUp} />
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.linkText}>Move to Login</Text>
-        </TouchableOpacity>
+        <Card containerStyle={styles.card}>
+          <Text h3 style={styles.title}>
+            Sign Up
+          </Text>
+
+          {errorMessage ? (
+            <Text style={styles.error}>{errorMessage}</Text>
+          ) : null}
+
+          <Input
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            leftIcon={{ type: "material", name: "person", color: "#666" }}
+            containerStyle={styles.inputContainer}
+            inputStyle={styles.inputText}
+          />
+
+          <Input
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            leftIcon={{ type: "material", name: "email", color: "#666" }}
+            containerStyle={styles.inputContainer}
+            inputStyle={styles.inputText}
+          />
+
+          <Input
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            leftIcon={{ type: "material", name: "lock", color: "#666" }}
+            containerStyle={styles.inputContainer}
+            inputStyle={styles.inputText}
+          />
+
+          <Button
+            title="Sign Up"
+            onPress={handleSignUp}
+            buttonStyle={styles.button}
+            titleStyle={styles.buttonText}
+          />
+
+          <Text
+            style={styles.linkText}
+            onPress={() => navigation.navigate("Login")}
+          >
+            Move to Login
+          </Text>
+        </Card>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -100,31 +113,53 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
+    backgroundColor: "#f4f6f8",
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 10,
+    padding:20,
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 40,
-  },
-  input: {
-    width: "100%",
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    textAlign: "center",
+    color: "#333",
     marginBottom: 20,
   },
   error: {
-    color: "red",
-    marginBottom: 30,
+    color: "#d9534f",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  inputText: {
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#3f51b5",
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: "100%",
+    marginTop: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   linkText: {
     marginTop: 20,
     fontSize: 16,
-    color: "purple",
+    color: "#3f51b5",
+    textAlign: "center",
     textDecorationLine: "underline",
-    marginVertical: 10,
   },
 });
 

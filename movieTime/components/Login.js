@@ -1,14 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Button, Card, Input, Text } from "react-native-elements";
 import { auth } from "../firebaseConfig";
 
 const Login = () => {
@@ -30,8 +24,6 @@ const Login = () => {
         setEmail("");
         setPassword("");
 
-        // navigation.navigate("Home");
-
         navigation.reset({
           index: 0,
           routes: [{ name: "Home" }],
@@ -46,30 +38,48 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
-      {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+      <Card containerStyle={styles.card}>
+        <Text h3 style={styles.title}>
+          Login
+        </Text>
 
-      <Text style={styles.title}>Login</Text>
+        {errorMessage ? (
+          <Text style={styles.error}>{errorMessage}</Text>
+        ) : null}
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-      />
+        <Input
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          leftIcon={{ type: "material", name: "email", color: "#666" }}
+          containerStyle={styles.inputContainer}
+          inputStyle={styles.inputText}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <Input
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          leftIcon={{ type: "material", name: "lock", color: "#666" }}
+          containerStyle={styles.inputContainer}
+          inputStyle={styles.inputText}
+        />
 
-      <Button title="Login" onPress={handleLogin} />
+        <Button
+          title="Login"
+          onPress={handleLogin}
+          buttonStyle={styles.button}
+          titleStyle={styles.buttonText}
+        />
 
-      <TouchableOpacity onPress={() => navigation.navigate("signUp")}>
-        <Text style={styles.linkText}>Create new account</Text>
-      </TouchableOpacity>
+        <Text
+          style={styles.linkText}
+          onPress={() => navigation.navigate("signUp")}
+        >
+          Create new account
+        </Text>
+      </Card>
     </View>
   );
 };
@@ -80,31 +90,53 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
+    backgroundColor: "#f4f6f8",
+  },
+  card: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 10,
+    padding: 20,
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 40,
-  },
-  input: {
-    width: "100%",
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    textAlign: "center",
+    color: "#333",
     marginBottom: 20,
   },
   error: {
-    color: "red",
-    marginBottom: 30,
+    color: "#d9534f",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  inputContainer: {
+    marginBottom: 15,
+  },
+  inputText: {
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#3f51b5",
+    paddingVertical: 12,
+    borderRadius: 8,
+    width: "100%",
+    marginTop: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
   linkText: {
     marginTop: 20,
     fontSize: 16,
-    color: "purple",
+    color: "#3f51b5",
+    textAlign: "center",
     textDecorationLine: "underline",
-    marginVertical: 10,
   },
 });
 

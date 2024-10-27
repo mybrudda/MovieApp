@@ -1,51 +1,107 @@
 import { useNavigation } from "@react-navigation/native";
+import { format } from 'date-fns';
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, FlatList, StyleSheet, View } from "react-native";
+import { Button, Card, Image, Input, Text } from "react-native-elements";
+import Icon from "react-native-vector-icons/Feather";
 import { auth } from "../firebaseConfig";
 
 const Home = () => {
   const [name, setName] = useState("");
+  const [movies, setMovies] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+
+  const apiKey = "5abdca4f5f81bf07d200a0521be782ef";
+  const api = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`;
 
   const navigation = useNavigation();
+
+  const fetchMovies = async () => {
+    try {
+      const response = await fetch(api);
+      const data = await response.json();
+      setMovies(data.results);
+
+    } catch (error) {
+      console.error("Error fetching movies", error);
+    }
+  };
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
       setName(user.displayName);
     }
+    fetchMovies();
   }, []);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-
       navigation.reset({
         index: 0,
         routes: [{ name: "Login" }],
       });
     } catch (error) {
-      Alert.alert("Error Loggin out");
+      Alert.alert("Error logging out");
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.appName}>MovieTime</Text>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          placeholderTextColor="#888"
+        <Input
+          placeholder="Search for movies..."
+          placeholderTextColor="#666"
+          value={searchValue}
+          onChangeText={setSearchValue}
+          inputContainerStyle={styles.inputContainer}
+          leftIcon={<Icon name="search" size={24} color="#666" />}
         />
-        <Button title="Search" onPress={() => {}} />
       </View>
 
       <View style={styles.content}>
-        <Button title="Logout" onPress={handleLogout} />
-        <Text style={styles.welcomeText}>Welcome to MovieTime!</Text>
-        <Text>{name}</Text>
+        <Text h4 style={styles.welcomeText}>
+          Welcome, {name}
+        </Text>
+        <Button
+          title="Logout"
+          buttonStyle={styles.logoutButton}
+          onPress={handleLogout}
+        />
       </View>
+
+      
+
+      <FlatList
+        data={movies}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <Card containerStyle={styles.movieContainer}>
+            <View style={styles.cardContent}>
+              <Image
+                source={{
+                  uri: `https://image.tmdb.org/t/p/w200${
+                    item.poster_path || ""
+                  }`,
+                }}
+                style={styles.poster}
+              />
+
+              <View style={styles.movieDetails}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.releaseDate}>
+                  {format(new Date(item.release_date), 'yyyy')}
+                </Text>
+                <Text style={styles.overview} numberOfLines={4}>
+                  {item.overview}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        )}
+      />
     </View>
   );
 };
@@ -53,41 +109,65 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    paddingTop: "15%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: "#f8f8f8",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    paddingTop: "10%",
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    backgroundColor: "#3f51b5",
   },
-  appName: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: 10,
-    marginRight: 10,
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+  inputContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    paddingLeft: 10,
   },
   content: {
-    flex: 1,
-    justifyContent: "center",
+    padding: 10,
     alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
   welcomeText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "500",
+    color: "#444",
+    marginBottom: 5,
+  },
+  logoutButton: {
+    backgroundColor: "#e57373",
+    borderRadius: 5,
+  },
+  movieContainer: {
+    padding: 20,
+    borderRadius: 10,
+    width: '95%',
+    alignSelf: 'center',
+  },
+  cardContent: {
+    flexDirection: "row",
+  },
+  poster: {
+    width: 130,
+    height: 180,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  movieDetails: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingRight: 10,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 5,
+  },
+  overview: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
   },
 });
 
