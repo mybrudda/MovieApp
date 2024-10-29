@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyBYQCacJw9IKw6PlJZ8U9B6jEsEZoooPF8",
   authDomain: "movietime-ee3eb.firebaseapp.com",

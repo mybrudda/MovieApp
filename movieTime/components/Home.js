@@ -3,30 +3,30 @@ import { format } from "date-fns";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, View } from "react-native";
-import {
-  ButtonGroup,
-  Card,
-  Image,
-  Input,
-  Text
-} from "react-native-elements";
+import { ButtonGroup, Card, Image, Input, Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import { auth } from "../firebaseConfig";
 
 const Home = () => {
   const [name, setName] = useState("");
   const [movies, setMovies] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState(null);
   const [page, setPage] = useState(1);
 
   const apiKey = "5abdca4f5f81bf07d200a0521be782ef";
   const api = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc`;
+  const searchApi = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${searchValue}&page=${page}`;
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchMovies();
+  };
 
   const navigation = useNavigation();
 
   const fetchMovies = async () => {
     try {
-      const response = await fetch(api);
+      const response = await fetch(searchValue ? searchApi : api);
       const data = await response.json();
       setMovies(data.results);
     } catch (error) {
@@ -66,9 +66,9 @@ const Home = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.first}>
-        <Text style={styles.appName}>MovieTime</Text>
-      
-        <Icon
+          <Text style={styles.appName}>MovieTime</Text>
+
+          <Icon
             name="log-out"
             size={30}
             color="white"
@@ -76,17 +76,17 @@ const Home = () => {
             style={styles.logoutIcon}
           />
         </View>
-        
+
         <Input
           placeholder="Search for movies..."
           placeholderTextColor="#666"
           value={searchValue}
-          onChangeText={setSearchValue}
+          onChangeText={(value) => setSearchValue(value)}
+          onSubmitEditing={handleSearch}
           inputContainerStyle={styles.inputContainer}
           leftIcon={<Icon name="search" size={24} color="#666" />}
           containerStyle={styles.inputWrapper}
         />
-       
       </View>
 
       <View style={styles.content}>
@@ -94,7 +94,6 @@ const Home = () => {
           Welcome, {name}
         </Text>
         <Text style={styles.pageNum}> {page}</Text>
-         
       </View>
 
       <FlatList
@@ -114,7 +113,9 @@ const Home = () => {
               <View style={styles.movieDetails}>
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.releaseDate}>
-                  {format(new Date(item.release_date), "yyyy")}
+                  {item.release_date
+                    ? format(new Date(item.release_date), "yyyy")
+                    : "Unknown"}
                 </Text>
                 <Text style={styles.overview} numberOfLines={4}>
                   {item.overview}
@@ -123,7 +124,6 @@ const Home = () => {
             </View>
           </Card>
         )}
-       
       />
 
       <ButtonGroup
@@ -150,21 +150,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: 'blue',
-    height: 150,
-    width: '100%',
+    backgroundColor: "blue",
+    height: 140,
+    width: "100%",
     padding: 10,
   },
-  first:{
-    flexDirection: 'row',
-    width: '100%',
-    justifyContent: 'space-between',
+  first: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
     padding: 10,
   },
-  appName:{
-    color: 'white',
-    alignSelf: 'center',
-    textTransform: 'uppercase',
+  appName: {
+    color: "white",
+    alignSelf: "center",
+    textTransform: "uppercase",
     letterSpacing: 1.5,
     fontSize: 18,
   },
@@ -172,22 +172,22 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   inputContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     paddingLeft: 10,
     width: 350,
-    alignSelf: 'center',
+    height: 40,
+    alignSelf: "center",
     marginTop: 5,
-
   },
   content: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     alignItems: "center",
-    justifyContent:'space-between',
+    justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
-    flexDirection:'row'
+    flexDirection: "row",
   },
   welcomeText: {
     fontSize: 18,
@@ -233,12 +233,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttonStyle: {
-    backgroundColor: "#3f51b5",
+    backgroundColor: "blue",
   },
-  pageNum:{
+  pageNum: {
     fontSize: 20,
-  }
-
+  },
 });
 
 export default Home;
