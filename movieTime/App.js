@@ -3,8 +3,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
 import Home from "./components/Home";
 import Login from "./components/Login";
+import MovieInfo from "./components/MovieInfo";
 import signUp from './components/signUp';
 import { auth } from "./firebaseConfig";
+
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -24,6 +26,7 @@ export default function App() {
     <NavigationContainer>
     <Stack.Navigator initialRouteName={userLoggedIn ? "Home" : "Login"} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="MovieInfo" component={MovieInfo} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="signUp" component={signUp} />
     </Stack.Navigator>

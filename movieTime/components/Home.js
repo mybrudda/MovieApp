@@ -2,7 +2,13 @@ import { useNavigation } from "@react-navigation/native";
 import { format } from "date-fns";
 import { signOut } from "firebase/auth";
 import React, { useEffect, useState } from "react";
-import { Alert, FlatList, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ButtonGroup, Card, Image, Input, Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import { auth } from "../firebaseConfig";
@@ -100,29 +106,42 @@ const Home = () => {
         data={movies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Card containerStyle={styles.movieContainer}>
-            <View style={styles.cardContent}>
-              <Image
-                source={{
-                  uri: `https://image.tmdb.org/t/p/w200${
-                    item.poster_path || ""
-                  }`,
-                }}
-                style={styles.poster}
-              />
-              <View style={styles.movieDetails}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.releaseDate}>
-                  {item.release_date
-                    ? format(new Date(item.release_date), "yyyy")
-                    : "Unknown"}
-                </Text>
-                <Text style={styles.overview} numberOfLines={4}>
-                  {item.overview}
-                </Text>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("MovieInfo", { movieId: item.id })
+            }
+          >
+            <Card containerStyle={styles.movieContainer}>
+              <View style={styles.cardContent}>
+                <Image
+                  source={{
+                    uri: `https://image.tmdb.org/t/p/w200${
+                      item.poster_path || ""
+                    }`,
+                  }}
+                  style={styles.poster}
+                />
+                <View style={styles.movieDetails}>
+                  <View style={styles.titleWrapper}>
+                    <View style={styles.titleText}>
+                      <Text style={styles.title}>{item.title}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.iconWrapper}>
+                      <Icon name="bookmark" size={24} color="black" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.releaseDate}>
+                    {item.release_date
+                      ? format(new Date(item.release_date), "yyyy")
+                      : "Unknown"}
+                  </Text>
+                  <Text style={styles.overview} numberOfLines={4}>
+                    {item.overview}
+                  </Text>
+                </View>
               </View>
-            </View>
-          </Card>
+            </Card>
+          </TouchableOpacity>
         )}
       />
 
@@ -220,6 +239,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
     marginBottom: 5,
+  },
+  titleWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  titleText: {
+    flex: 1,
+    marginRight: 10,
   },
   overview: {
     fontSize: 14,
