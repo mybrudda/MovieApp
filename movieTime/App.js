@@ -5,6 +5,7 @@ import Home from "./components/Home";
 import Login from "./components/Login";
 import MovieInfo from "./components/MovieInfo";
 import signUp from './components/signUp';
+import Watchlist from "./components/Watchlist.js";
 import { auth } from "./firebaseConfig";
 
 const Stack = createStackNavigator();
@@ -24,13 +25,13 @@ export default function App() {
 
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName={userLoggedIn ? "Home" : "Login"} screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="MovieInfo" component={MovieInfo} />
-      <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="signUp" component={signUp} />
-    </Stack.Navigator>
-  </NavigationContainer>
-      
+      <Stack.Navigator initialRouteName={userLoggedIn ? "Home" : "Login"} screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="MovieInfo" component={MovieInfo} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="signUp" component={signUp} />
+        <Stack.Screen name="Watchlist" component={Watchlist} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

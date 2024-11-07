@@ -5,6 +5,7 @@ import { StyleSheet, View } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth } from "../firebaseConfig";
 
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

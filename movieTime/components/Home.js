@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { format } from "date-fns";
 import { signOut } from "firebase/auth";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -9,9 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { ButtonGroup, Card, Image, Input, Text } from "react-native-elements";
+import {
+  Button,
+  ButtonGroup,
+  Card,
+  Image,
+  Input,
+  Text,
+} from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 const Home = () => {
   const [name, setName] = useState("");
@@ -68,6 +76,39 @@ const Home = () => {
     }
   };
 
+  const addToWatchlist = async (movie) => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Please log in to add movies to your watchlist");
+      return;
+    }
+
+    try {
+      await setDoc(
+        doc(db, "users", user.uid, "watchlist", movie.id.toString()),
+        {
+          title: movie.title,
+          poster: movie.poster_path,
+          releaseYear: movie.release_date,
+          overview: movie.overview,
+          addedAt: serverTimestamp(),
+        }
+      );
+
+      Alert.alert(
+        "Added to Watchlist",
+        `${movie.title} has been added to your watchlist.`
+      );
+    } catch (error) {
+      console.error("Error adding to watchlist", error);
+      Alert.alert("Error", "Could not add to watchlist. Please try again.");
+    }
+  };
+
+  const navigateToWatchlist = () => {
+    navigation.navigate("Watchlist");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -97,8 +138,34 @@ const Home = () => {
 
       <View style={styles.content}>
         <Text h4 style={styles.welcomeText}>
-          Welcome, {name}
+        {name}
         </Text>
+        <Button
+          title="Watchlist"
+          onPress={navigateToWatchlist}
+          icon={
+            <Icon
+              name="bookmark" 
+              size={20}
+              color="white"
+              style={{ marginRight: 5 }} 
+            />
+          }
+          iconPosition="left"
+        />
+        <Button
+      title="Rating"
+      // onPress={navigateToRating}
+      icon={
+        <Icon
+          name="star"  
+          size={20}
+          color="white"
+          style={{ marginRight: 5 }} 
+        />
+      }
+      iconPosition="left"  
+    />
         <Text style={styles.pageNum}> {page}</Text>
       </View>
 
@@ -126,7 +193,10 @@ const Home = () => {
                     <View style={styles.titleText}>
                       <Text style={styles.title}>{item.title}</Text>
                     </View>
-                    <TouchableOpacity style={styles.iconWrapper}>
+                    <TouchableOpacity
+                      style={styles.iconWrapper}
+                      onPress={() => addToWatchlist(item)}
+                    >
                       <Icon name="bookmark" size={24} color="black" />
                     </TouchableOpacity>
                   </View>

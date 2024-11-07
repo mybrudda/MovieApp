@@ -1,15 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  
 
   const navigation = useNavigation();
 
@@ -28,6 +30,14 @@ const SignUp = () => {
         await updateProfile(user, {
           displayName: username,
         });
+
+        await setDoc(doc(db, "users", user.uid), {
+          username: username,
+          email: email,
+          createdAt: serverTimestamp(), 
+        });
+        
+
         setEmail("");
         setPassword("");
         setUsername("");
