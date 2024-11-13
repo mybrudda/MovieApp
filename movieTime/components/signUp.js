@@ -6,7 +6,7 @@ import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-nati
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth, db } from "../firebaseConfig";
 
-const SignUp = () => {
+const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -173,4 +173,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUp;
+export default Signup;

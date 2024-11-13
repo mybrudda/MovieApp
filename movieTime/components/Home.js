@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { format } from "date-fns";
 import { signOut } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -26,6 +26,9 @@ const Home = () => {
   const [movies, setMovies] = useState([]);
   const [searchValue, setSearchValue] = useState(null);
   const [page, setPage] = useState(1);
+
+
+  const flatListRef = useRef(null);
 
   const apiKey = "5abdca4f5f81bf07d200a0521be782ef";
   const api = `https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&include_adult=false&include_video=false&language=en-US&page=${page}&sort_by=popularity.desc`;
@@ -69,6 +72,7 @@ const Home = () => {
   };
 
   const handlePageChange = (selectedIndex) => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     if (selectedIndex === 0 && page > 1) {
       setPage(page - 1);
     } else if (selectedIndex === 1) {
@@ -170,6 +174,7 @@ const Home = () => {
       </View>
 
       <FlatList
+        ref={flatListRef}
         data={movies}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (

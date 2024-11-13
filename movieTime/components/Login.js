@@ -76,7 +76,7 @@ const Login = () => {
 
         <Text
           style={styles.linkText}
-          onPress={() => navigation.navigate("signUp")}
+          onPress={() => navigation.navigate("Signup")}
         >
           Create new account
         </Text>

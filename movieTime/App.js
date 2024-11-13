@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import MovieInfo from "./components/MovieInfo";
-import signUp from './components/signUp';
+import Signup from './components/Signup.js';
 import Watchlist from "./components/Watchlist.js";
 import { auth } from "./firebaseConfig";
 
@@ -29,8 +29,9 @@ export default function App() {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="MovieInfo" component={MovieInfo} />
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="signUp" component={signUp} />
+        <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="Watchlist" component={Watchlist} />
+ 
       </Stack.Navigator>
     </NavigationContainer>
   );

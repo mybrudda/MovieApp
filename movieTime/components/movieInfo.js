@@ -1,12 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Card, Image, Text } from "react-native-elements";
+import {
+  collection,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Button, Card, Image, Text } from "react-native-elements";
+import Icon from "react-native-vector-icons/Feather";
+import { auth, db } from "../firebaseConfig";
 
 const MovieInfo = ({ route }) => {
   const { movieId } = route.params;
   const [movie, setMovie] = useState(null);
   const [cast, setCast] = useState([]);
+  const [rating, setRating] = useState("");
+  const [review, setReview] = useState("");
+  const [reviews, setReviews] = useState([]);
+  const [isRatingFormVisible, setIsRatingFormVisible] = useState(false);
 
+  const scrollViewRef = useRef(null);
   const apiKey = "5abdca4f5f81bf07d200a0521be782ef";
 
   const fetchMovieDetails = async () => {
@@ -27,8 +41,29 @@ const MovieInfo = ({ route }) => {
     }
   };
 
+  const fetchReviews = async () => {
+    try {
+      const reviewsRef = collection(
+        db,
+        "movies",
+        movieId.toString(),
+        "reviews"
+      );
+      const snapshot = await getDocs(reviewsRef);
+      const movieReviews = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setReviews(movieReviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      Alert.alert("Error", "Could not fetch reviews. Please try again.");
+    }
+  };
+
   useEffect(() => {
     fetchMovieDetails();
+    fetchReviews();
   }, [movieId]);
 
   if (!movie) {
@@ -41,10 +76,51 @@ const MovieInfo = ({ route }) => {
     return "lightgreen";
   };
 
+  const scrollToRatingForm = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ y: 1000, animated: true });
+    }
+  };
+
+  const submitReview = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Please log in to submit a review");
+      return;
+    }
+
+    if (!rating || isNaN(rating) || rating < 1 || rating > 10) {
+      Alert.alert("Invalid Rating", "Please enter a rating between 1 and 10.");
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, "movies", movieId.toString(), "reviews", user.uid), {
+        userId: user.uid,
+        movieId: movieId,
+        movieName: movie.title,
+        userName: user.displayName,
+        title: movie.title,
+        rating: parseFloat(rating),
+        review: review,
+        reviewDate: serverTimestamp(),
+      });
+
+      Alert.alert("Review Submitted", "Your review has been submitted.");
+      setRating("");
+      setReview("");
+      setIsRatingFormVisible(false);
+      fetchReviews();
+    } catch (error) {
+      console.error("Error submitting review", error);
+      Alert.alert("Error", "Could not submit review. Please try again.");
+    }
+  };
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView ref={scrollViewRef} style={styles.container}>
       <Card containerStyle={styles.card}>
-        <Card.Title style={styles.appName}>MovieTime</Card.Title>
+        <Card.Title style={styles.appName}>Movie info</Card.Title>
         <Card.Divider />
 
         <View style={styles.imageContainer}>
@@ -118,6 +194,62 @@ const MovieInfo = ({ route }) => {
           )}
         </ScrollView>
       </View>
+
+      {isRatingFormVisible && (
+        <View style={styles.ratingFormContainer}>
+          <Text style={styles.ratingLabel}>Rate the movie (1-10):</Text>
+          <TextInput
+            style={styles.ratingInput}
+            placeholder="Enter a rating (1-10)"
+            keyboardType="numeric"
+            maxLength={2}
+            value={rating}
+            onChangeText={setRating}
+          />
+
+          <Text style={styles.reviewLabel}>Write your review:</Text>
+          <TextInput
+            style={styles.reviewTextArea}
+            placeholder="Enter your review here..."
+            multiline
+            value={review}
+            onChangeText={setReview}
+          />
+
+          <Button title="Submit Review" onPress={submitReview} />
+        </View>
+      )}
+
+      <Button
+        title="Rate It"
+        buttonStyle={styles.rateButton}
+        onPress={() => {
+          setIsRatingFormVisible(!isRatingFormVisible);
+          scrollToRatingForm();
+        }}
+        icon={
+          <Icon
+            name="star"
+            size={20}
+            color="white"
+            style={{ marginRight: 5 }}
+          />
+        }
+      />
+      <View style={styles.reviewsContainer}>
+        <Text style={styles.reviewsTitle}>Reviews:</Text>
+        {reviews.length > 0 ? (
+          reviews.map((item) => (
+            <View key={item.id} style={styles.reviewItem}>
+              <Text style={styles.reviewUser}>{item.userName}</Text>
+              <Text style={styles.reviewRating}>Rating: {item.rating}</Text>
+              <Text style={styles.reviewText}>{item.review}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noReviewsText}>No reviews available.</Text>
+        )}
+      </View>
     </ScrollView>
   );
 };
@@ -125,29 +257,30 @@ const MovieInfo = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f2f2f2",
   },
   card: {
     padding: 20,
-    borderRadius: 10,
-    margin: 40,
+    borderRadius: 8,
+    marginHorizontal: 15,
+    marginTop: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
   genres: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#5e96b6",
   },
   appName: {
-    color: "blue",
+    color: "#2d74da",
     alignSelf: "center",
     textTransform: "uppercase",
     letterSpacing: 1.5,
-    fontSize: 24,
+    fontSize: 22,
   },
   imageContainer: {
     alignItems: "center",
@@ -159,33 +292,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "700",
     color: "#333",
-    marginVertical: 5,
+    marginVertical: 10,
     textAlign: "center",
   },
   info: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "500",
+    color: "#555",
     marginVertical: 5,
   },
   rating: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    color: "black",
-    padding: 8,
-    borderRadius: 5,
-    marginVertical: 5,
+    color: "#333",
+    padding: 6,
+    borderRadius: 4,
+    marginTop: 10,
     textAlign: "center",
-    alignSelf: "flex-end",
+    alignSelf: "center",
+    width: 50,
   },
   detailsContainer: {
-    padding: 20,
-    backgroundColor: "#eefffc",
+    padding: 15,
+    backgroundColor: "#ffffff",
     borderRadius: 8,
-    margin: 10,
+    marginHorizontal: 15,
+    marginTop: 15,
+    marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -193,10 +329,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   overviewContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
     backgroundColor: "#ffffff",
-    margin: 10,
+    marginHorizontal: 15,
+    marginBottom: 15,
     borderRadius: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -205,9 +342,9 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   overview: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#666",
-    lineHeight: 20,
+    lineHeight: 22,
   },
   errorText: {
     color: "red",
@@ -216,10 +353,11 @@ const styles = StyleSheet.create({
   },
   castContainer: {
     paddingHorizontal: 10,
-    paddingVertical: 20,
-    backgroundColor: "#eefffc",
+    paddingVertical: 15,
+    backgroundColor: "#ffffff",
     borderRadius: 8,
-    margin: 10,
+    marginHorizontal: 15,
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -228,17 +366,17 @@ const styles = StyleSheet.create({
   },
   castTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#333",
-    marginBottom: 20,
+    marginBottom: 15,
   },
   castScroll: {
     flexDirection: "row",
   },
   castMemberContainer: {
     alignItems: "center",
-    marginHorizontal: 10,
-    width: 90,
+    marginHorizontal: 8,
+    width: 80,
   },
   castImage: {
     width: 60,
@@ -250,6 +388,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
+    marginBottom: 5,
     backgroundColor: "#ddd",
     color: "#666",
     textAlign: "center",
@@ -261,6 +400,108 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     textAlign: "center",
+  },
+  ratingFormContainer: {
+    padding: 15,
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    marginHorizontal: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  ratingLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 10,
+  },
+  ratingInput: {
+    height: 40,
+    borderColor: "#007ACC",
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    backgroundColor: "#f8f9fa",
+  },
+  reviewLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 10,
+  },
+  reviewTextArea: {
+    height: 100,
+    borderColor: "#007ACC",
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    backgroundColor: "#f8f9fa",
+    textAlignVertical: "top",
+    marginBottom: 20,
+  },
+  rateButton: {
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 15,
+    marginBottom: 30,
+    width: 120,
+    alignSelf: "center",
+  },
+  reviewsContainer: {
+    padding: 15,
+    backgroundColor: "#ffffff",
+    marginHorizontal: 15,
+    marginBottom: 20,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  reviewsTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 10,
+  },
+  reviewItem: {
+    padding: 15,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  reviewUser: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  reviewRating: {
+    fontSize: 14,
+    color: "#666",
+    marginVertical: 5,
+  },
+  reviewText: {
+    fontSize: 14,
+    color: "#333",
+    marginTop: 5,
+  },
+  noReviewsText: {
+    fontSize: 16,
+    color: "#aaa",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 
