@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth, db } from "../firebaseConfig";
 
@@ -52,6 +52,7 @@ const Signup = () => {
         setErrorMessage("Please fill in all the fields");
       }
     } catch (error) {
+      console.log("Error signing up:", error.message); 
       setErrorMessage(
         "Please enter a valid email and password (at least 6 characters long)"
       );

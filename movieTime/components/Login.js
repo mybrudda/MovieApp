@@ -5,7 +5,6 @@ import { StyleSheet, View } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth } from "../firebaseConfig";
 
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +15,13 @@ const Login = () => {
   useEffect(() => {
     setErrorMessage("");
   }, []);
+
+  const navigateToSignup = () => {
+    setEmail("");
+    setPassword("");
+    setErrorMessage("");
+    navigation.navigate("Signup");
+  };
 
   const handleLogin = async () => {
     setErrorMessage("");
@@ -33,6 +39,7 @@ const Login = () => {
         setErrorMessage("Please fill in all the fields");
       }
     } catch (error) {
+      console.log("Error loggin: ", error.message);
       setErrorMessage("Error: Entered email or password is not correct");
     }
   };
@@ -44,9 +51,7 @@ const Login = () => {
           Login
         </Text>
 
-        {errorMessage ? (
-          <Text style={styles.error}>{errorMessage}</Text>
-        ) : null}
+        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
         <Input
           placeholder="Email"
@@ -74,10 +79,7 @@ const Login = () => {
           titleStyle={styles.buttonText}
         />
 
-        <Text
-          style={styles.linkText}
-          onPress={() => navigation.navigate("Signup")}
-        >
+        <Text style={styles.linkText} onPress={navigateToSignup}>
           Create new account
         </Text>
       </Card>

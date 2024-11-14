@@ -88,24 +88,30 @@ const MovieInfo = ({ route }) => {
       Alert.alert("Please log in to submit a review");
       return;
     }
-
+  
     if (!rating || isNaN(rating) || rating < 1 || rating > 10) {
       Alert.alert("Invalid Rating", "Please enter a rating between 1 and 10.");
       return;
     }
-
+  
+    const reviewData = {
+      userId: user.uid,
+      movieId: movieId,
+      movieName: movie.title,
+      userName: user.displayName,
+      title: movie.title,
+      rating: parseFloat(rating),
+      review: review,
+      reviewDate: serverTimestamp(),
+    };
+  
     try {
-      await setDoc(doc(db, "movies", movieId.toString(), "reviews", user.uid), {
-        userId: user.uid,
-        movieId: movieId,
-        movieName: movie.title,
-        userName: user.displayName,
-        title: movie.title,
-        rating: parseFloat(rating),
-        review: review,
-        reviewDate: serverTimestamp(),
-      });
-
+      // Add the review to the movie's reviews subcollection
+      await setDoc(doc(db, "movies", movieId.toString(), "reviews", user.uid), reviewData);
+  
+      // Add the review to the user's reviews collection
+      await setDoc(doc(db, "users", user.uid, "reviews", movieId.toString()), reviewData);
+  
       Alert.alert("Review Submitted", "Your review has been submitted.");
       setRating("");
       setReview("");
@@ -116,7 +122,6 @@ const MovieInfo = ({ route }) => {
       Alert.alert("Error", "Could not submit review. Please try again.");
     }
   };
-
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <Card containerStyle={styles.card}>
