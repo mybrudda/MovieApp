@@ -67,6 +67,7 @@ const Home = () => {
         routes: [{ name: "Login" }],
       });
     } catch (error) {
+      console.log('Error Logout:', error.message)
       Alert.alert("Error logging out");
     }
   };

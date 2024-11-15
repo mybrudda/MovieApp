@@ -8,14 +8,12 @@ import Icon from "react-native-vector-icons/Feather";
 import { auth, db } from "../firebaseConfig";
 
 const Watchlist = () => {
-
   const [movies, setMovies] = useState([]);
   const navigation = useNavigation();
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-
       fetchWatchlist(user.uid);
     }
   }, []);
@@ -34,25 +32,14 @@ const Watchlist = () => {
     }
   };
 
-  const handleDelete = (movieId) => {
-    Alert.alert("Delete", "Are you sure you want to remove this movie?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Yes",
-        onPress: async () => {
-          try {
-            const movieRef = doc(db, "users", auth.currentUser.uid, "watchlist", movieId);
-            await deleteDoc(movieRef);
-            setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== movieId));
-          } catch (error) {
-            Alert.alert("Error", "Could not delete the movie. Please try again.");
-          }
-        },
-      },
-    ]);
+  const handleDelete = async (movieId) => {
+    try {
+      const movieRef = doc(db, "users", auth.currentUser.uid, "watchlist", movieId);
+      await deleteDoc(movieRef);
+      setMovies((prevMovies) => prevMovies.filter((movie) => movie.id !== movieId));
+    } catch (error) {
+      Alert.alert("Error", "Could not delete the movie. Please try again.");
+    }
   };
 
   return (
@@ -60,8 +47,6 @@ const Watchlist = () => {
       <View style={styles.header}>
         <Text style={styles.appName}>Watchlist</Text>
       </View>
-
-
 
       <FlatList
         data={movies}
@@ -76,8 +61,13 @@ const Watchlist = () => {
                 />
                 <View style={styles.movieDetails}>
                   <View style={styles.titleWrapper}>
-                    <Text style={styles.title}>{item.title}</Text>
-                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteIcon}>
+                    <View style={styles.titleText}>
+                      <Text style={styles.title}>{item.title}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.deleteIcon}
+                      onPress={() => handleDelete(item.id)}
+                    >
                       <Icon name="trash-2" size={24} color="#9c0000" />
                     </TouchableOpacity>
                   </View>
@@ -116,21 +106,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     fontSize: 18,
   },
-  content: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-    flexDirection: "row",
-  },
-  welcomeText: {
-    fontSize: 18,
-    fontWeight: "500",
-    color: "#444",
-    marginBottom: 5,
-  },
   movieContainer: {
     padding: 20,
     borderRadius: 10,
@@ -162,6 +137,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 5,
+  },
+  titleText: {
+    flex: 1, 
   },
   overview: {
     fontSize: 14,
