@@ -1,9 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -27,22 +28,44 @@ const Login = () => {
     setErrorMessage("");
     try {
       if (email.length > 0 && password.length > 0) {
-        await signInWithEmailAndPassword(auth, email, password);
-        setEmail("");
-        setPassword("");
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
 
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Home" }],
-        });
+        const user = userCredential.user;
+  
+        if (user.emailVerified) {
+          
+          const userRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (!userData.verified) {
+              await updateDoc(userRef, { verified: true });
+            }
+          }
+          
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "Home" }],
+          });
+
+        } else {
+          await auth.signOut();
+          setErrorMessage("Please verify your email before logging in.");
+        }
       } else {
         setErrorMessage("Please fill in all the fields");
       }
     } catch (error) {
-      console.log("Error loggin: ", error.message);
+      console.log("Error logging in: ", error.message);
       setErrorMessage("Error: Entered email or password is not correct");
     }
   };
+  
 
   return (
     <View style={styles.container}>

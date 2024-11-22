@@ -1,8 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification, updateProfile
+} from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Alert, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import {
+  Alert,
+  Keyboard,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth, db } from "../firebaseConfig";
 
@@ -11,7 +20,6 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  
 
   const navigation = useNavigation();
 
@@ -24,8 +32,14 @@ const Signup = () => {
 
     try {
       if (email.length > 0 && password.length > 0 && username.length > 0) {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
         const user = userCredential.user;
+
+        await sendEmailVerification(user);
 
         await updateProfile(user, {
           displayName: username,
@@ -34,25 +48,30 @@ const Signup = () => {
         await setDoc(doc(db, "users", user.uid), {
           username: username,
           email: email,
-          createdAt: serverTimestamp(), 
+          verified: false,
+          createdAt: serverTimestamp(),
         });
-        
 
         setEmail("");
         setPassword("");
         setUsername("");
 
-        Alert.alert("Success", "User created successfully!", [
-          {
-            text: "OK",
-            onPress: () => navigation.navigate("Login"),
-          },
-        ]);
+        Alert.alert(
+          "Verify Email",
+          "A verification email has been sent to your email address. Please verify your email before login",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("Login"),
+            },
+          ]
+        );
+
       } else {
         setErrorMessage("Please fill in all the fields");
       }
     } catch (error) {
-      console.log("Error signing up:", error.message); 
+      console.log("Error signing up:", error.message);
       setErrorMessage(
         "Please enter a valid email and password (at least 6 characters long)"
       );
@@ -130,7 +149,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     borderRadius: 10,
-    padding:20,
+    padding: 20,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
