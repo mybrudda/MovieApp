@@ -3,7 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
 import Home from "./components/Home";
 import Login from "./components/Login";
-import MovieInfo from "./components/MovieInfo";
+import MovieInfo from "./components/MovieInfo.js";
 import Ratings from "./components/Ratings.js";
 import Signup from './components/Signup.js';
 import Watchlist from "./components/Watchlist.js";

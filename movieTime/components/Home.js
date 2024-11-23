@@ -20,13 +20,13 @@ import {
 } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import { auth, db } from "../firebaseConfig";
+import listStyles from "../styles/MovieListStyle";
 
 const Home = () => {
   const [name, setName] = useState("");
   const [movies, setMovies] = useState([]);
   const [searchValue, setSearchValue] = useState(null);
   const [page, setPage] = useState(1);
-
 
   const flatListRef = useRef(null);
 
@@ -46,6 +46,7 @@ const Home = () => {
       const response = await fetch(searchValue ? searchApi : api);
       const data = await response.json();
       setMovies(data.results);
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     } catch (error) {
       console.error("Error fetching movies", error);
     }
@@ -67,7 +68,7 @@ const Home = () => {
         routes: [{ name: "Login" }],
       });
     } catch (error) {
-      console.log('Error Logout:', error.message)
+      console.log("Error Logout:", error.message);
       Alert.alert("Error logging out");
     }
   };
@@ -110,10 +111,6 @@ const Home = () => {
     }
   };
 
-  const navigateToWatchlist = () => {
-    navigation.navigate("Watchlist");
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -143,35 +140,38 @@ const Home = () => {
 
       <View style={styles.content}>
         <Text h4 style={styles.welcomeText}>
-        {name}
+          {name}
         </Text>
+
         <Button
           title="Watchlist"
-          onPress={navigateToWatchlist}
+          onPress={() => navigation.navigate("Watchlist")}
           icon={
             <Icon
-              name="bookmark" 
+              name="bookmark"
               size={20}
               color="white"
-              style={{ marginRight: 5 }} 
+              style={{ marginRight: 5 }}
             />
           }
           iconPosition="left"
         />
+
         <Button
-      title="Rating"
-      onPress={() => navigation.navigate('Ratings')}
-      icon={
-        <Icon
-          name="star"  
-          size={20}
-          color="white"
-          style={{ marginRight: 5 }} 
+          title="Rating"
+          onPress={() => navigation.navigate("Ratings")}
+          icon={
+            <Icon
+              name="star"
+              size={20}
+              color="white"
+              style={{ marginRight: 5 }}
+            />
+          }
+          iconPosition="left"
         />
-      }
-      iconPosition="left"  
-    />
-        <Text style={styles.pageNum}> {page}</Text>
+
+        <Text style={styles.pageNum}>{page}</Text>
       </View>
 
       <FlatList
@@ -184,34 +184,34 @@ const Home = () => {
               navigation.navigate("MovieInfo", { movieId: item.id })
             }
           >
-            <Card containerStyle={styles.movieContainer}>
-              <View style={styles.cardContent}>
+            <Card containerStyle={listStyles.movieContainer}>
+              <View style={listStyles.cardContent}>
                 <Image
                   source={{
                     uri: `https://image.tmdb.org/t/p/w200${
                       item.poster_path || ""
                     }`,
                   }}
-                  style={styles.poster}
+                  style={listStyles.poster}
                 />
-                <View style={styles.movieDetails}>
-                  <View style={styles.titleWrapper}>
-                    <View style={styles.titleText}>
-                      <Text style={styles.title}>{item.title}</Text>
+                <View style={listStyles.movieDetails}>
+                  <View style={listStyles.titleWrapper}>
+                    <View style={listStyles.titleText}>
+                      <Text style={listStyles.title}>{item.title}</Text>
                     </View>
                     <TouchableOpacity
-                      style={styles.iconWrapper}
+                      style={listStyles.iconWrapper}
                       onPress={() => addToWatchlist(item)}
                     >
                       <Icon name="bookmark" size={24} color="black" />
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.releaseDate}>
+                  <Text style={listStyles.releaseDate}>
                     {item.release_date
                       ? format(new Date(item.release_date), "yyyy")
                       : "Unknown"}
                   </Text>
-                  <Text style={styles.overview} numberOfLines={4}>
+                  <Text style={listStyles.overview} numberOfLines={4}>
                     {item.overview}
                   </Text>
                 </View>
@@ -224,16 +224,16 @@ const Home = () => {
       <ButtonGroup
         buttons={[
           <View>
-            <Icon name="chevron-left" size={25} color="#fff" />
+            <Icon name="chevron-left" size={30} color="black" />
           </View>,
           <View>
-            <Icon name="chevron-right" size={25} color="#fff" />
+            <Icon name="chevron-right" size={30} color="black" />
           </View>,
         ]}
         selectedIndex={null}
         onPress={handlePageChange}
-        containerStyle={styles.buttonGroupContainer}
-        buttonStyle={styles.buttonStyle}
+        containerStyle={listStyles.buttonGroupContainer}
+        buttonStyle={listStyles.buttonStyle}
       />
     </View>
   );
@@ -264,7 +264,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   logoutIcon: {
-    padding: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
   inputContainer: {
     backgroundColor: "white",
@@ -289,56 +290,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#444",
     marginBottom: 5,
-  },
-  movieContainer: {
-    padding: 20,
-    borderRadius: 10,
-    width: "95%",
-    alignSelf: "center",
-  },
-  cardContent: {
-    flexDirection: "row",
-  },
-  poster: {
-    width: 130,
-    height: 180,
-    borderRadius: 8,
-    marginRight: 15,
-  },
-  movieDetails: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingRight: 10,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
-  },
-  titleWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  titleText: {
-    flex: 1,
-    marginRight: 10,
-  },
-  overview: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-  },
-  buttonGroupContainer: {
-    marginVertical: 10,
-    borderRadius: 8,
-    width: "60%",
-    alignSelf: "center",
-  },
-  buttonStyle: {
-    backgroundColor: "blue",
   },
   pageNum: {
     fontSize: 20,

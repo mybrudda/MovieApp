@@ -6,6 +6,7 @@ import { Alert, FlatList, StyleSheet, TouchableOpacity, View } from "react-nativ
 import { Card, Image, Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import { auth, db } from "../firebaseConfig";
+import listStyles from '../styles/MovieListStyle';
 
 const Watchlist = () => {
   const [movies, setMovies] = useState([]);
@@ -43,7 +44,7 @@ const Watchlist = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={listStyles.container}>
       <View style={styles.header}>
         <Text style={styles.appName}>Watchlist</Text>
       </View>
@@ -53,28 +54,28 @@ const Watchlist = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation.navigate("MovieInfo", { movieId: item.id })}>
-            <Card containerStyle={styles.movieContainer}>
-              <View style={styles.cardContent}>
+            <Card containerStyle={listStyles.movieContainer}>
+              <View style={listStyles.cardContent}>
                 <Image
                   source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster}` }}
-                  style={styles.poster}
+                  style={listStyles.poster}
                 />
-                <View style={styles.movieDetails}>
-                  <View style={styles.titleWrapper}>
-                    <View style={styles.titleText}>
-                      <Text style={styles.title}>{item.title}</Text>
+                <View style={listStyles.movieDetails}>
+                  <View style={listStyles.titleWrapper}>
+                    <View style={listStyles.titleText}>
+                      <Text style={listStyles.title}>{item.title}</Text>
                     </View>
                     <TouchableOpacity
-                      style={styles.deleteIcon}
+                      style={listStyles.deleteIcon}
                       onPress={() => handleDelete(item.id)}
                     >
                       <Icon name="trash-2" size={24} color="#9c0000" />
                     </TouchableOpacity>
                   </View>
-                  <Text style={styles.releaseDate}>
+                  <Text style={listStyles.releaseDate}>
                     {item.releaseYear ? format(new Date(item.releaseYear), "yyyy") : "Unknown"}
                   </Text>
-                  <Text style={styles.overview} numberOfLines={4}>
+                  <Text style={listStyles.overview} numberOfLines={4}>
                     {item.overview}
                   </Text>
                 </View>
@@ -105,51 +106,6 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.5,
     fontSize: 18,
-  },
-  movieContainer: {
-    padding: 20,
-    borderRadius: 10,
-    width: "95%",
-    alignSelf: "center",
-  },
-  cardContent: {
-    flexDirection: "row",
-  },
-  poster: {
-    width: 130,
-    height: 180,
-    borderRadius: 8,
-    marginRight: 15,
-  },
-  movieDetails: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingRight: 10,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
-  },
-  titleWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  titleText: {
-    flex: 1, 
-  },
-  overview: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
-  },
-  releaseDate: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
   },
   deleteIcon: {
     padding: 5,

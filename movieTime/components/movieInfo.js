@@ -10,6 +10,7 @@ import { Alert, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { Button, Card, Image, Text } from "react-native-elements";
 import Icon from "react-native-vector-icons/Feather";
 import { auth, db } from "../firebaseConfig";
+import ReviewStyle from "../styles/ReviewStyle";
 
 const MovieInfo = ({ route }) => {
   const { movieId } = route.params;
@@ -88,12 +89,12 @@ const MovieInfo = ({ route }) => {
       Alert.alert("Please log in to submit a review");
       return;
     }
-  
+
     if (!rating || isNaN(rating) || rating < 1 || rating > 10) {
       Alert.alert("Invalid Rating", "Please enter a rating between 1 and 10.");
       return;
     }
-  
+
     const reviewData = {
       userId: user.uid,
       movieId: movieId,
@@ -104,14 +105,20 @@ const MovieInfo = ({ route }) => {
       review: review,
       reviewDate: serverTimestamp(),
     };
-  
+
     try {
       // Add the review to the movie's reviews subcollection
-      await setDoc(doc(db, "movies", movieId.toString(), "reviews", user.uid), reviewData);
-  
+      await setDoc(
+        doc(db, "movies", movieId.toString(), "reviews", user.uid),
+        reviewData
+      );
+
       // Add the review to the user's reviews collection
-      await setDoc(doc(db, "users", user.uid, "reviews", movieId.toString()), reviewData);
-  
+      await setDoc(
+        doc(db, "users", user.uid, "reviews", movieId.toString()),
+        reviewData
+      );
+
       Alert.alert("Review Submitted", "Your review has been submitted.");
       setRating("");
       setReview("");
@@ -122,6 +129,7 @@ const MovieInfo = ({ route }) => {
       Alert.alert("Error", "Could not submit review. Please try again.");
     }
   };
+
   return (
     <ScrollView ref={scrollViewRef} style={styles.container}>
       <Card containerStyle={styles.card}>
@@ -241,20 +249,26 @@ const MovieInfo = ({ route }) => {
           />
         }
       />
-      <View style={styles.reviewsContainer}>
-        <Text style={styles.reviewsTitle}>Reviews:</Text>
+
+      
+      <View style={ReviewStyle.reviewsContainer}>
+        <Text style={ReviewStyle.reviewsTitle}>Reviews:</Text>
         {reviews.length > 0 ? (
           reviews.map((item) => (
-            <View key={item.id} style={styles.reviewItem}>
-              <Text style={styles.reviewUser}>{item.userName}</Text>
-              <Text style={styles.reviewRating}>Rating: {item.rating}</Text>
-              <Text style={styles.reviewText}>{item.review}</Text>
+            <View key={item.id} style={ReviewStyle.reviewItem}>
+              <Text style={ReviewStyle.reviewUser}>{item.userName}</Text>
+              <Text style={ReviewStyle.reviewRating}>
+                Rating: {item.rating}
+              </Text>
+              <Text style={ReviewStyle.reviewText}>{item.review}</Text>
             </View>
           ))
         ) : (
-          <Text style={styles.noReviewsText}>No reviews available.</Text>
+          <Text style={ReviewStyle.noReviewsText}>No reviews available.</Text>
         )}
       </View>
+
+   
     </ScrollView>
   );
 };
@@ -457,56 +471,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: 120,
     alignSelf: "center",
-  },
-  reviewsContainer: {
-    padding: 15,
-    backgroundColor: "#ffffff",
-    marginHorizontal: 15,
-    marginBottom: 20,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
-    elevation: 2,
-  },
-  reviewsTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 10,
-  },
-  reviewItem: {
-    padding: 15,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  reviewUser: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  reviewRating: {
-    fontSize: 14,
-    color: "#666",
-    marginVertical: 5,
-  },
-  reviewText: {
-    fontSize: 14,
-    color: "#333",
-    marginTop: 5,
-  },
-  noReviewsText: {
-    fontSize: 16,
-    color: "#aaa",
-    textAlign: "center",
-    marginTop: 20,
   },
 });
 

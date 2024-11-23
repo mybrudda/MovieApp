@@ -8,12 +8,12 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Keyboard,
-  StyleSheet,
   TouchableWithoutFeedback,
-  View,
+  View
 } from "react-native";
 import { Button, Card, Input, Text } from "react-native-elements";
 import { auth, db } from "../firebaseConfig";
+import styles from "../styles/AuthStyle";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -129,7 +129,7 @@ const Signup = () => {
             style={styles.linkText}
             onPress={() => navigation.navigate("Login")}
           >
-            Move to Login
+            Already have an account?
           </Text>
         </Card>
       </View>
@@ -137,60 +137,5 @@ const Signup = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "#f4f6f8",
-  },
-  card: {
-    width: "100%",
-    maxWidth: 400,
-    borderRadius: 10,
-    padding: 20,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  title: {
-    textAlign: "center",
-    color: "#333",
-    marginBottom: 20,
-  },
-  error: {
-    color: "#d9534f",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  inputText: {
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#3f51b5",
-    paddingVertical: 12,
-    borderRadius: 8,
-    width: "100%",
-    marginTop: 10,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  linkText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: "#3f51b5",
-    textAlign: "center",
-    textDecorationLine: "underline",
-  },
-});
 
 export default Signup;
