@@ -51,7 +51,7 @@ export default styles = StyleSheet.create({
     alignSelf: "center",
   },
   buttonStyle: {
-    backgroundColor: "transparent",
+    backgroundColor: "#b2c5e7",
   },
 
 });
